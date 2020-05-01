@@ -1,6 +1,7 @@
 import React from 'react'
-import { renderChart, renderChartFunc } from './renderChart'
+import { renderChart, renderChartFunc, renderChartLine } from './renderChart'
 import './App.css'
+import { lineOption } from './constants'
 
 export default class App extends React.Component<{}, {}> {
   ref: HTMLDivElement | null = null
@@ -36,9 +37,18 @@ export default class App extends React.Component<{}, {}> {
     }, 1500)
   }
 
+  demoLine() {
+    if (this.ref) {
+      renderChartLine(this.ref, lineOption)
+    } else {
+      console.error('dom not exit')
+    }
+  }
+
   componentDidMount() {
-    // this.demo11()
-    this.demo2()
+    // this.demo1()
+    // this.demo2()
+    this.demoLine()
   }
 
   componentWillUnmount() {
