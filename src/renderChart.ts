@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import { toNumber, flatten } from 'lodash'
+import { schemeCategory10 } from 'd3'
 
 function drawSvg(dom: HTMLElement) {
   // 生成画布
@@ -79,6 +80,8 @@ export function renderChartLine(dom: HTMLElement, option: ILineOption) {
     top: height * toNumber(bottom.slice(0, -1)) * 0.01,
     bottom: height * toNumber(bottom.slice(0, -1)) * 0.01,
   }
+  // 颜色
+  const scaleColor = d3.scaleOrdinal<string, string>().domain(xAxisData).range(schemeCategory10)
   // x 轴
   const scaleX = d3
     .scalePoint()
@@ -117,14 +120,13 @@ export function renderChartLine(dom: HTMLElement, option: ILineOption) {
     .enter()
     .append('path')
     .attr('d', (d) => {
-      console.log('@d', d)
       return line(
         d.map((v, index) => {
           return [scaleX(xAxisData[index]!)!, scaleY(v)]
         })
       )
     })
-    .attr('stroke', 'red')
+    .attr('stroke', (_d, index) => scaleColor(xAxisData[index]!))
     .attr('fill', 'none')
     .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')')
 }
