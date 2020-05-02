@@ -1,15 +1,11 @@
-import { ILineChartOption } from './LineChart'
+import { IHexagonChartOption } from './HexagonChart'
 
-export const lineChartOption: ILineChartOption = {
+export const hexagonChartOption: IHexagonChartOption = {
   margin: {
     top: '3%',
     left: '2%',
     right: '2%',
     bottom: '3%',
   },
-  series: [
-    {
-      data: [],
-    },
-  ],
+  series: [],
 }
