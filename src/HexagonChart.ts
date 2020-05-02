@@ -28,7 +28,7 @@ interface IItem {
   /**
    * 对应节点值
    */
-  value: string
+  value: number
   /**
    * 对应节点颜色
    */
