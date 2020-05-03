@@ -266,6 +266,7 @@ export default class HexagonChart {
         const y = radius + partY * lineNum
         return [x, y]
       })
+      const that = this
       d3.select(groupG.nodes()[index])
         .selectAll(`.path-${index}`)
         .data(hexbin(points))
@@ -277,7 +278,38 @@ export default class HexagonChart {
         })
         .attr('fill', (_, index) => data[index].color)
         .attr('d', hexbin.hexagon(radius))
+        // 由于事件通过this传递dom，不能使用箭头函数
+        .on('mousedown', function () {
+          that.mousedown(this)
+        })
+        .on('mousemove', function () {
+          that.mousemove(this)
+        })
+        .on('mouseup', function () {
+          that.mouseup(this)
+        })
+        .on('mouseout', function () {
+          that.mouseout(this)
+        })
     })
+  }
+
+  mousedown(el: SVGPathElement) {
+    this.mousemove(el)
+  }
+
+  mouseup(el: SVGPathElement) {
+    this.mouseout(el)
+  }
+
+  mousemove(el: SVGPathElement) {
+    d3.select(el).attr('class', 'active')
+    d3.select(el.parentElement).attr('class', 'active-group')
+  }
+
+  mouseout(el: SVGPathElement) {
+    d3.select(el).attr('class', '')
+    d3.select(el.parentElement).attr('class', '')
   }
 
   render(option: IHexagonChartOption) {

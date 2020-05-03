@@ -1,0 +1,8 @@
+.active-group path{
+  opacity: 0.5;
+}
+.active-group .active {
+  opacity: 1;
+  stroke: #000000;
+  stroke-width: 3px;
+}
