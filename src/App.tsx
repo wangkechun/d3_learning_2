@@ -1,9 +1,34 @@
 import React from 'react'
-import HexagonChart, { IPosition, IItem } from './HexagonChart'
+import HexagonChart, { IPosition, IItem, ILine } from './HexagonChart'
+import LineChart from './LineChart'
 import './App.css'
 import { hexagonChartOption } from './constants'
 
-class HexagonChartX extends React.Component<
+class LineChartComponent extends React.Component<{ data: ILine[] }, {}> {
+  ref: HTMLDivElement | null = null
+  lineChart: LineChart | null = null
+
+  setRef = (ref: HTMLDivElement | null) => {
+    this.ref = ref
+  }
+
+  render() {
+    return <div className="tooltip-line" ref={this.setRef}></div>
+  }
+
+  componentDidMount() {
+    if (this.ref) {
+      this.lineChart = new LineChart(this.ref)
+      this.lineChart.render(this.props.data)
+    }
+  }
+
+  componentWillUnmount() {
+    this.lineChart?.dispose()
+  }
+}
+
+class HexagonChartComponent extends React.Component<
   {},
   { showTooltip: boolean; position: IPosition; data: IItem }
 > {
@@ -51,7 +76,9 @@ class HexagonChartX extends React.Component<
         {showTooltip && (
           <div
             className="tooltip"
-            style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+            style={{
+              transform: `translate(${position.x}px, ${position.y}px)`,
+            }}
           >
             <div className="tooltip-header">
               <span
@@ -61,6 +88,7 @@ class HexagonChartX extends React.Component<
               {data.value}
             </div>
             <div className="tooltip-content">{data.name}</div>
+            <LineChartComponent data={data.line} />
           </div>
         )}
       </>
@@ -94,6 +122,7 @@ export default class App extends React.Component<
       height: window.document.body.clientHeight,
     })
   }
+
   componentDidMount() {
     this.renderChart()
     window.addEventListener('resize', this.renderChart)
@@ -104,6 +133,8 @@ export default class App extends React.Component<
   }
 
   render() {
-    return <HexagonChartX key={`${this.state.width}-${this.state.height}`} />
+    return (
+      <HexagonChartComponent key={`${this.state.width}-${this.state.height}`} />
+    )
   }
 }

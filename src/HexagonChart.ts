@@ -11,7 +11,7 @@ interface IChartMargin {
   right: string | number
   bottom: string | number
 }
-interface ILine {
+export interface ILine {
   /**
    * 时间，支持时间戳格式
    */

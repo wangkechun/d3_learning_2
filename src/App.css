@@ -32,3 +32,9 @@
 .tooltip-content {
   color: #8accf2;
 }
+
+.tooltip-line {
+  width: 200px;
+  height: 100px;
+  color: #ffffff;
+}
