@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import * as d3Hexbin from 'd3-hexbin'
-import { isString, max, first } from 'lodash'
+import { isString, max, range, get, sum } from 'lodash'
 
 /**
  * 图表布局设置，支持数字或百分数 (50 | '2%')
@@ -75,6 +75,10 @@ export default class HexagonChart {
    * 默认六边形之间间隔占比
    */
   DefaultInterval = 0.06
+  /**
+   * 标题高度
+   */
+  DefaultNameHeight = 20
 
   series: Array<IData> = []
 
@@ -136,32 +140,41 @@ export default class HexagonChart {
     if (this.series.length === 0) {
       return
     }
-    this.renderHexagon()
+    this.renderGroup()
+  }
+
+  // 根据数据获取每个分组宽度和高度
+  groups = () => {
+    // 分组数目
+    const groups = this.series.length
+    // 行数
+    let lines = 1
+    if (groups > this.DefaultLineGroup) {
+      lines = Math.ceil(groups / this.DefaultLineGroup)
+    }
+    // 计算每一行高度
+    const lineHeight =
+      lines === 1
+        ? this.quadrantHeight()
+        : Math.floor(this.quadrantHeight() / lines)
+    // 列数
+    let columns = groups
+    if (lines > 1) {
+      columns = this.DefaultLineGroup
+    }
+    // 计算每一组的宽度
+    const columnWidth = Math.floor(this.quadrantWidth() / columns)
+    return { lineHeight, columnWidth, lines, columns }
   }
 
   // 根据数据获取半径
   radius = () => {
-    // 分组数目
-    const groups = this.series.length
+    const { lineHeight, columnWidth } = this.groups()
     // 点数量最后的分组对应的点数
     const maxPoints = max(this.series.map((line) => line.data.length))!
     if (!maxPoints) {
       return this.MaxRadius
     }
-    // 行数
-    let lines = 1
-    if (groups > this.DefaultLineGroup) {
-      lines = Math.floor(groups / this.DefaultLineGroup)
-    }
-    // 计算每一行高度
-    const lineHeight = Math.floor(this.quadrantHeight() / lines)
-    // 列数
-    let columns = groups
-    if (lines > 1) {
-      columns = groups % this.DefaultLineGroup
-    }
-    // 计算每一组的宽度
-    const columnWidth = Math.floor(this.quadrantWidth() / columns)
     // 根据行高计算六边形高度
     const hexgonHeight = Math.floor(
       lineHeight / Math.ceil(maxPoints / this.DefaultHexgonNum)
@@ -176,7 +189,11 @@ export default class HexagonChart {
           Math.sqrt(3) / 2)
     )
     // 计算每一个六边形直径
-    const hexgonDiameter = Math.min(hexgonHeight, hexgonWidth)
+    const hexgonDiameter = Math.min(
+      hexgonHeight - this.DefaultNameHeight,
+      hexgonWidth
+    )
+
     const hexagonRadius = Math.floor(hexgonDiameter / 2)
 
     return hexagonRadius > this.MaxRadius
@@ -186,34 +203,81 @@ export default class HexagonChart {
       : hexagonRadius
   }
 
-  renderHexagon = () => {
+  // 根据数据及半径求每一行的实际高度
+  lineHeight = () => {
+    const { lines, columns } = this.groups()
+    const radius = this.radius()
+    return range(lines).map((_, line) => {
+      const maxHeight =
+        max(
+          range(columns).map((_, column) => {
+            const points = (
+              get(this.series, [
+                line * this.DefaultLineGroup + column,
+                'data',
+              ]) || []
+            ).length
+            const pointLines = Math.ceil(points / this.DefaultHexgonNum)
+            return radius * (pointLines * (1.5 + this.DefaultInterval + 0.5))
+          })
+        ) || 0
+      return maxHeight + this.DefaultNameHeight
+    })
+  }
+
+  renderGroup = () => {
+    const { columnWidth, columns } = this.groups()
+    const lineHeights = this.lineHeight()
+    const groupG = this._bodyG!.selectAll('.group')
+      .data(this.series)
+      .enter()
+      .append('g')
+      .attr('class', (_, index) => `group-${index}`)
+      .attr('transform', (_, index) => {
+        const row = Math.floor(index / columns)
+        const column = index % columns
+        return `translate(${columnWidth * column}, ${sum(
+          lineHeights.slice(0, row)
+        )})`
+      })
+    groupG.append('text').text((data) => data.name)
+    this.renderHexagon(groupG)
+  }
+
+  renderHexagon = (
+    groupG: d3.Selection<SVGGElement, IData, SVGGElement, unknown>
+  ) => {
     const hexbin = d3Hexbin.hexbin()
     const radius = this.radius()
     const partX = (Math.sqrt(3) / 2 + this.DefaultInterval) * radius
     const partY = (1.5 + this.DefaultInterval) * radius
-    const data = first(this.series)!.data
-    const points: [number, number][] = data.map((_, index) => {
-      // 计算当前节点处于第几行
-      const lineNum = Math.floor(index / this.DefaultHexgonNum)
-      // 计算当前节点处于第几列
-      const columnNum = Math.floor(index % this.DefaultHexgonNum)
-      // 判断当前节点是否为奇数行
-      const isEventLine = lineNum % 2 === 0
-      const x = isEventLine
-        ? partX * (columnNum * 2 + 1)
-        : partX * (columnNum + 1) * 2
-      const y = radius + partY * lineNum
-      return [x, y]
-    })
-    this._bodyG!.selectAll('path')
-      .data(hexbin(points))
-      .enter()
-      .append('path')
-      .attr('transform', function (d) {
-        return 'translate(' + d.x + ',' + d.y + ')'
+    groupG.each((group, index) => {
+      const data = group.data
+      const points: [number, number][] = data.map((_, index) => {
+        // 计算当前节点处于第几行
+        const lineNum = Math.floor(index / this.DefaultHexgonNum)
+        // 计算当前节点处于第几列
+        const columnNum = Math.floor(index % this.DefaultHexgonNum)
+        // 判断当前节点是否为奇数行
+        const isEventLine = lineNum % 2 === 0
+        const x = isEventLine
+          ? partX * (columnNum * 2 + 1)
+          : partX * (columnNum + 1) * 2
+        const y = radius + partY * lineNum
+        return [x, y]
       })
-      .attr('fill', (_, index) => data[index].color)
-      .attr('d', hexbin.hexagon(radius))
+      d3.select(groupG.nodes()[index])
+        .selectAll(`.path-${index}`)
+        .data(hexbin(points))
+        .enter()
+        .append('path')
+        .attr('class', `.path-${index}`)
+        .attr('transform', (d) => {
+          return `translate(${d.x}, ${d.y + this.DefaultNameHeight})`
+        })
+        .attr('fill', (_, index) => data[index].color)
+        .attr('d', hexbin.hexagon(radius))
+    })
   }
 
   render(option: IHexagonChartOption) {
