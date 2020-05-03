@@ -21,7 +21,7 @@ interface ILine {
    */
   value: number
 }
-interface IItem {
+export interface IItem {
   /**
    * 内部元素描述信息
    */
@@ -39,6 +39,11 @@ interface IItem {
    */
   line: Array<ILine>
 }
+
+export interface IPosition {
+  x: number
+  y: number
+}
 interface IData {
   name: string
   data: Array<IItem>
@@ -54,6 +59,9 @@ export default class HexagonChart {
   _margin: IChartMargin = { top: 0, left: 0, right: 0, bottom: 0 }
   _svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null = null
   _bodyG: d3.Selection<SVGGElement, unknown, null, undefined> | null = null
+
+  addTooltip?: (position: IPosition, data: IItem) => void
+  removeTooltip?: () => void
 
   /**
    * 默认最大半径
@@ -82,11 +90,17 @@ export default class HexagonChart {
 
   series: Array<IData> = []
 
-  constructor(dom: HTMLElement) {
+  constructor(
+    dom: HTMLElement,
+    addTooltip?: (position: IPosition, data: IItem) => void,
+    removeTooltip?: () => void
+  ) {
     this._dom = dom
     const { clientWidth, clientHeight } = dom
     this._width = clientWidth
     this._height = clientHeight
+    this.addTooltip = addTooltip
+    this.removeTooltip = removeTooltip
   }
 
   formatPrecent = (value: number | string, base: number) => {
@@ -127,6 +141,12 @@ export default class HexagonChart {
     } else {
       this._svg.attr('width', this._width).attr('height', this._height)
     }
+    this._svg
+      .append('defs')
+      .append('style')
+      .text(
+        '.active-group path{opacity: 0.5;}.active-group .active {opacity: 1;stroke: #000000;stroke-width: 3px;}'
+      )
   }
 
   renderBody = () => {
@@ -279,11 +299,13 @@ export default class HexagonChart {
         .attr('fill', (_, index) => data[index].color)
         .attr('d', hexbin.hexagon(radius))
         // 由于事件通过this传递dom，不能使用箭头函数
-        .on('mousedown', function () {
-          that.mousedown(this)
+        .on('mousedown', function (_, index) {
+          const d = data[index]
+          that.mousedown(this, d)
         })
-        .on('mousemove', function () {
-          that.mousemove(this)
+        .on('mousemove', function (_, index) {
+          const d = data[index]
+          that.mousemove(this, d)
         })
         .on('mouseup', function () {
           that.mouseup(this)
@@ -294,22 +316,28 @@ export default class HexagonChart {
     })
   }
 
-  mousedown(el: SVGPathElement) {
-    this.mousemove(el)
+  mousedown = (el: SVGPathElement, data: IItem) => {
+    this.mousemove(el, data)
   }
 
-  mouseup(el: SVGPathElement) {
+  mouseup = (el: SVGPathElement) => {
     this.mouseout(el)
   }
 
-  mousemove(el: SVGPathElement) {
+  mousemove = (el: SVGPathElement, data: IItem) => {
     d3.select(el).attr('class', 'active')
     d3.select(el.parentElement).attr('class', 'active-group')
+    if (this.addTooltip) {
+      this.addTooltip({ x: d3.event.pageX + 10, y: d3.event.pageY + 10 }, data)
+    }
   }
 
-  mouseout(el: SVGPathElement) {
+  mouseout = (el: SVGPathElement) => {
     d3.select(el).attr('class', '')
     d3.select(el.parentElement).attr('class', '')
+    if (this.removeTooltip) {
+      this.removeTooltip()
+    }
   }
 
   render(option: IHexagonChartOption) {

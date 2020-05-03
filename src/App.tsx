@@ -1,9 +1,12 @@
 import React from 'react'
-import HexagonChart from './HexagonChart'
+import HexagonChart, { IPosition, IItem } from './HexagonChart'
 import './App.css'
 import { hexagonChartOption } from './constants'
 
-class HexagonChartX extends React.Component<{}, {}> {
+class HexagonChartX extends React.Component<
+  {},
+  { showTooltip: boolean; position: IPosition; data: IItem }
+> {
   ref: HTMLDivElement | null = null
 
   hexagonChart: HexagonChart | null = null
@@ -11,13 +14,66 @@ class HexagonChartX extends React.Component<{}, {}> {
   setRef = (ref: HTMLDivElement | null) => {
     this.ref = ref
   }
+
+  state = {
+    showTooltip: false,
+    position: {
+      x: 0,
+      y: 0,
+    },
+    data: {
+      name: '',
+      value: 0,
+      color: '',
+      line: [],
+    },
+  }
+
+  addTooltip = (position: IPosition, data: IItem) => {
+    this.setState({
+      showTooltip: true,
+      position,
+      data,
+    })
+  }
+
+  removeTooltip = () => {
+    this.setState({
+      showTooltip: false,
+    })
+  }
+
   render() {
-    return <div className="chart" ref={this.setRef}></div>
+    const { showTooltip, data, position } = this.state
+    return (
+      <>
+        <div className="chart" ref={this.setRef} />
+        {showTooltip && (
+          <div
+            className="tooltip"
+            style={{ transform: `translate(${position.x}px, ${position.y}px)` }}
+          >
+            <div className="tooltip-header">
+              <span
+                className="tooltip-indicator"
+                style={{ background: data.color }}
+              ></span>
+              {data.value}
+            </div>
+            <div className="tooltip-content">{data.name}</div>
+          </div>
+        )}
+      </>
+    )
   }
 
   componentDidMount() {
     if (this.ref) {
-      this.hexagonChart = new HexagonChart(this.ref)
+      this.hexagonChart = new HexagonChart(
+        this.ref,
+        this.addTooltip,
+        this.removeTooltip
+      )
       this.hexagonChart.render(hexagonChartOption)
     }
   }
