@@ -59,6 +59,9 @@ export default class HexagonChart {
    * 默认最大半径
    */
   MaxRadius = 100
+  /**
+   * 默认最小半径
+   */
   MinRadius = 10
   /**
    * 默认每一行最多的分组数
@@ -110,12 +113,15 @@ export default class HexagonChart {
   }
 
   renderSvg = () => {
-    if (!this._svg) {
+    this._svg = d3.select(this._dom).select('svg')
+    if (this._svg.empty()) {
       this._svg = d3
         .select(this._dom)
         .append('svg')
         .attr('width', this._width)
         .attr('height', this._height)
+    } else {
+      this._svg.attr('width', this._width).attr('height', this._height)
     }
   }
 
@@ -164,9 +170,11 @@ export default class HexagonChart {
     // 根据列宽计算六边形宽度
     const hexgonWidth = Math.floor(
       columnWidth /
-        ((maxPoints > this.DefaultHexgonNum ? this.DefaultHexgonNum : maxPoints) + 1)
+        ((maxPoints > this.DefaultHexgonNum
+          ? this.DefaultHexgonNum
+          : maxPoints) +
+          Math.sqrt(3) / 2)
     )
-    console.log("hexgonWidth", columnWidth, hexgonWidth)
     // 计算每一个六边形直径
     const hexgonDiameter = Math.min(hexgonHeight, hexgonWidth)
     const hexagonRadius = Math.floor(hexgonDiameter / 2)
@@ -181,7 +189,7 @@ export default class HexagonChart {
   renderHexagon = () => {
     const hexbin = d3Hexbin.hexbin()
     const radius = this.radius()
-    const partX = (Math.sqrt(3) / 2 + this.DefaultInterval) * radius 
+    const partX = (Math.sqrt(3) / 2 + this.DefaultInterval) * radius
     const partY = (1.5 + this.DefaultInterval) * radius
     const data = first(this.series)!.data
     const points: [number, number][] = data.map((_, index) => {
@@ -214,5 +222,11 @@ export default class HexagonChart {
     this.series = series
     this.renderSvg()
     this.renderBody()
+  }
+
+  dispose() {
+    if (this._svg) {
+      this._svg.remove()
+    }
   }
 }
