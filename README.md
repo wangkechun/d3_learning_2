@@ -37,13 +37,39 @@ hexagonChart.render(option)
           "name": "info",
           "value": 12,
           "color": "red",
-          "line": [10, 1, 13, 12]
+          "line": [
+            {
+              "time": 1588486390000,
+              "value": 7,
+            },
+            {
+              "time": 1588486420000,
+              "value": 9,
+            },
+            {
+              "time": 1588486840000,
+              "value": 12,
+            }
+          ]
         },
         {
           "name": "info2",
           "value": 13,
           "color": "green",
-          "line": [1, 2, 3, 13]
+          "line": [
+            {
+              "time": 1588486390000,
+              "value": 17,
+            },
+            {
+              "time": 1588486420000,
+              "value": 5,
+            },
+            {
+              "time": 1588486840000,
+              "value": 13,
+            }
+          ]
         },
         ...
       ]

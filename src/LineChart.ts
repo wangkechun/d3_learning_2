@@ -5,7 +5,7 @@ export default class LineChart {
   _dom: HTMLElement
   _width: number
   _height: number
-  _margin = { top: 5, left: 17, right: 5, bottom: 15 }
+  _margin = { top: 5, left: 15, right: 5, bottom: 15 }
   _xScale: d3.ScaleTime<number, number> | null = null
   _YScale: d3.ScaleLinear<number, number> | null = null
   _svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | null = null
