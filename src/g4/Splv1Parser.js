@@ -3,8 +3,6 @@
 var antlr4 = require('antlr4/index');
 var Splv1ParserListener = require('./Splv1ParserListener').Splv1ParserListener;
 
-package io.qiniu.antlr;
-
 var grammarFileName = "Splv1Parser.g4";
 
 
