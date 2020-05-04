@@ -1,5 +1,20 @@
-import { InputStream, Token } from "antlr4";
+import { CommonTokenStream, InputStream, Token } from "antlr4";
+const ErrorListener = require("antlr4").error.ErrorListener;
 import { CalcLexer } from "./g4/CalcLexer.js";
+import { CalcParser } from "./g4/CalcParser.js";
+
+class MyErrorListener extends ErrorListener {
+  syntaxError(
+    recognizer: any,
+    offendingSymbol: any,
+    line: any,
+    column: any,
+    msg: any,
+    e: any
+  ) {
+    console.log("ERROR " + msg);
+  }
+}
 function createLexer(input: string) {
   const chars = new InputStream(input);
   const lexer = new CalcLexer(chars) as any;
@@ -9,4 +24,27 @@ function createLexer(input: string) {
 
 export function getTokens(input: string): Token[] {
   return createLexer(input).getAllTokens();
+}
+function createParser(input: string) {
+  const lexer = createLexer(input);
+  return createParserFromLexer(lexer);
+}
+
+function createParserFromLexer(lexer: any) {
+  const tokens = new CommonTokenStream(lexer);
+  return new CalcParser(tokens);
+}
+function parseTree(input: any) {
+  const parser = createParser(input);
+  return parser.compilationUnit();
+}
+export function parseTreeStr(input: any) {
+  const lexer = createLexer(input);
+  lexer.removeErrorListeners();
+  lexer.addErrorListener(new MyErrorListener());
+  const parser = createParserFromLexer(lexer) as any;
+  parser.removeErrorListeners();
+  parser.addErrorListener(new MyErrorListener());
+  const tree = parser.compilationUnit();
+  return tree.toStringTree(parser.ruleNames);
 }
