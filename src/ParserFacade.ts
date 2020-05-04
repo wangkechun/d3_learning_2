@@ -1,7 +1,7 @@
 import { CommonTokenStream, InputStream, Token } from "antlr4";
-const ErrorListener = require("antlr4").error.ErrorListener;
 import { CalcLexer } from "./g4/CalcLexer.js";
 import { CalcParser } from "./g4/CalcParser.js";
+const ErrorListener = require("antlr4").error.ErrorListener;
 
 class MyErrorListener extends ErrorListener {
   syntaxError(
@@ -15,7 +15,7 @@ class MyErrorListener extends ErrorListener {
     console.log("ERROR " + msg);
   }
 }
-function createLexer(input: string) {
+export function createLexer(input: string) {
   const chars = new InputStream(input);
   const lexer = new CalcLexer(chars) as any;
   lexer.strictMode = false;
