@@ -82,7 +82,8 @@ export function tokensForLine(input: string): monaco.languages.ILineTokens {
     myTokens.push(new CalcToken("error.calc", e));
   }
   myTokens.sort((a, b) => (a.startIndex > b.startIndex ? 1 : -1));
-  console.log("@token", input, new Set(myTokens.map((v) => v.scopes)));
+  console.log("@token", input, myTokens);
+  // console.log("@token", input, new Set(myTokens.map((v) => v.scopes)));
 
   return new CalcLineTokens(myTokens);
 }
