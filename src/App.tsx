@@ -16,7 +16,7 @@ export default class App extends React.Component<{}, {}> {
     }
     monaco.editor.create(this.ref, {
       value: 'console.log("Hello, world")',
-      language: "javascript",
+      language: "calc ",
     });
   }
   render() {

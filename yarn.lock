@@ -1400,6 +1400,11 @@
   resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-7.2.1.tgz#2ad4e844175a3738cb9e7064be5ea070b8863a1c"
   integrity sha512-oZ0Ib5I4Z2pUEcoo95cT1cr6slco9WY7yiPpG+RGNkj8YcYgJnM7pXmYmorNOReh8MIGcKSqXyeGjxnr8YiZbA==
 
+"@types/antlr4@^4.7.1":
+  version "4.7.1"
+  resolved "http://bnpm.byted.org/@types/antlr4/download/@types/antlr4-4.7.1.tgz#09a8f985e29149c73e92b161d08691a1fd8425ef"
+  integrity sha1-Caj5heKRScc+krFh0IaRof2EJe8=
+
 "@types/babel__core@^7.1.0":
   version "7.1.6"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.6.tgz#16ff42a5ae203c9af1c6e190ed1f30f83207b610"
