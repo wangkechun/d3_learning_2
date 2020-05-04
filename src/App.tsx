@@ -16,18 +16,31 @@ function init() {
     base: "vs",
     inherit: false,
     rules: [
-      { token: "number_lit.calc", foreground: literalFg },
-      { token: "id.calc", foreground: idFg, fontStyle: "italic" },
+      { token: "search.calc", foreground: keywordFg },
+      { token: "ws.calc", foreground: literalFg },
+      { token: "identifier.calc", foreground: idFg },
+      { token: "eq.calc", foreground: symbolsFg },
+      { token: "int.calc", foreground: symbolsFg },
+      { token: "or.calc", foreground: symbolsFg },
+      { token: "in.calc", foreground: symbolsFg },
       { token: "lparen.calc", foreground: symbolsFg },
+      { token: "quoted_string.calc", foreground: symbolsFg },
+      { token: "comma.calc", foreground: symbolsFg },
       { token: "rparen.calc", foreground: symbolsFg },
-      { token: "equal.calc", foreground: symbolsFg },
-      { token: "minus.calc", foreground: symbolsFg },
-      { token: "plus.calc", foreground: symbolsFg },
-      { token: "div.calc", foreground: symbolsFg },
-      { token: "mul.calc", foreground: symbolsFg },
-      { token: "input_kw.calc", foreground: keywordFg, fontStyle: "bold" },
-      { token: "output_kw.calc", foreground: keywordFg, fontStyle: "bold" },
-      { token: "unrecognized.calc", foreground: errorFg },
+      { token: "and.calc", foreground: keywordFg },
+      { token: "identifier_with_star.calc", foreground: literalFg },
+      { token: "neqj.calc", foreground: literalFg },
+      { token: "lt.calc", foreground: literalFg },
+      { token: "vbar.calc", foreground: literalFg },
+      { token: "eval.calc", foreground: literalFg },
+      { token: "plus.calc", foreground: literalFg },
+      { token: "star.calc", foreground: literalFg },
+      { token: "replace.calc", foreground: literalFg },
+      { token: "with.calc", foreground: literalFg },
+      { token: "stats.calc", foreground: literalFg },
+      { token: "as.calc", foreground: literalFg },
+      { token: "by.calc", foreground: literalFg },
+      { token: "limit.calc", foreground: literalFg },
     ],
   };
   monaco.editor.defineTheme(
@@ -51,9 +64,9 @@ export default class App extends React.Component<{}, {}> {
     }
 
     monaco.editor.create(this.ref, {
-      value: ["input a", "b = a * 2", "c = (a - b) / 3", "output c", ""].join(
-        "\n"
-      ),
+      value: `
+search a=10 or b in ("a","b","c") and (b=prefix* and d!="10=") and c<10 | eval a="a0"+10*(3+1*3+1) | replace "a" with "b" in a,b  | stats avg(f) as f1, sum(f) as f2 by a | limit 10
+      `,
       language: "calc",
       theme: "myCoolTheme",
     });

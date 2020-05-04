@@ -1,6 +1,6 @@
 import { CommonTokenStream, InputStream, Token } from "antlr4";
-import { CalcLexer } from "./g4/CalcLexer.js";
-import { CalcParser } from "./g4/CalcParser.js";
+import { Splv1Lexer as CalcLexer } from "./g4/Splv1Lexer.js";
+import { Splv1Parser as CalcParser } from "./g4/Splv1Parser.js";
 const ErrorListener = require("antlr4").error.ErrorListener;
 
 class MyErrorListener extends ErrorListener {
@@ -35,7 +35,7 @@ function createParserFromLexer(lexer: any) {
   return new CalcParser(tokens);
 }
 function parseTree(input: any) {
-  const parser = createParser(input);
+  const parser = createParser(input) as any;
   return parser.compilationUnit();
 }
 export function parseTreeStr(input: any) {

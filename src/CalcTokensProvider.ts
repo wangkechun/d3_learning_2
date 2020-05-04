@@ -1,5 +1,6 @@
 import { createLexer } from "./ParserFacade";
 import * as monaco from "monaco-editor";
+
 type ILineTokens = monaco.languages.ILineTokens;
 const ErrorListener = require("antlr4").error.ErrorListener;
 
@@ -81,5 +82,7 @@ export function tokensForLine(input: string): monaco.languages.ILineTokens {
     myTokens.push(new CalcToken("error.calc", e));
   }
   myTokens.sort((a, b) => (a.startIndex > b.startIndex ? 1 : -1));
+  console.log("@token", input, new Set(myTokens.map((v) => v.scopes)));
+
   return new CalcLineTokens(myTokens);
 }
